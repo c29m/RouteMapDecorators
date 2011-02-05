@@ -1,6 +1,6 @@
 RouteMapDecorators
 ==================
-Register Asp.NET MVC routes through ActionFilter attributes.
+Register Asp.NET MVC routes explicitly through ActionFilter attributes.
 
 Example
 -------
