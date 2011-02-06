@@ -2,6 +2,8 @@ RouteMapDecorators
 ==================
 Register Asp.NET MVC routes explicitly through ActionFilter attributes.
 
+Just another take on the solutions discussed for [this question on StackOverflow.com](http://stackoverflow.com/q/894779/183720).
+
 Example
 -------
 
