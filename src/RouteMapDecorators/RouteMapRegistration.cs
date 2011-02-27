@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Web.Mvc;
 
 namespace RouteMapDecorators
 {
 	public class RouteMapRegistration
 	{
 		internal readonly List<MethodInfo> Actions = new List<MethodInfo>();
+
+		public void InAllControllersFromAssemblyOf<TController>() where TController : Controller
+		{
+			InAllControllersFromAssembly(typeof(TController).Assembly);
+		}
 
 		public void InAllControllersFromAssembly(Assembly assembly)
 		{
