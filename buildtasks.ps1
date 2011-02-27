@@ -28,7 +28,7 @@ task Release -depends Init {
 	$net_version = (ls "$env:windir\Microsoft.NET\Framework\v3.5*").Name
 	new-item $release_dir -itemType directory -ErrorAction SilentlyContinue
 	new-item $release_temp_dir -itemType directory -ErrorAction SilentlyContinue
-	exec { &"C:\Windows\Microsoft.NET\Framework\$net_version\MSBuild.exe" "$sln_file" /p:OutDir="$release_temp_dir\" /p:Configuration="Release" }
+	exec { &"$env:windir\Microsoft.NET\Framework\$net_version\MSBuild.exe" "$sln_file" /p:OutDir="$release_temp_dir\" /p:Configuration="Release" }
 	
 	foreach($dll in $dlls) {
 		copy-item "$release_temp_dir\$dll" $release_dir
