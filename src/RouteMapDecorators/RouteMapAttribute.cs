@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace RouteMapDecorators
 {
-	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
 	public class RouteMapAttribute : Attribute
 	{
+		protected readonly string Constraints;
+		protected readonly string Defaults;
+
 		/// <summary>
 		/// </summary>
 		/// <param name = "url">The url pattern that invokes the action when matched.</param>
@@ -18,7 +22,7 @@ namespace RouteMapDecorators
 		/// </summary>
 		/// <param name = "url">The url pattern that invokes the action when matched.</param>
 		/// <param name = "defaults">A dictionary of key values formatted as: 'myParam=defValue;otherParam=someValue;</param>
-		/// <param name = "constraints">A dictionary of key values formatted as: 'myParam=[regex];otherParam=[regex];</param>
+		/// <param name = "constraints">A dictionary of key values formatted as: 'myParam=regex;otherParam=regex;</param>
 		public RouteMapAttribute(string url, string defaults, string constraints)
 			: this(null, url, defaults, constraints)
 		{
@@ -44,17 +48,8 @@ namespace RouteMapDecorators
 			Name = name;
 			Url = url;
 
-			if (!string.IsNullOrEmpty(defaults))
-			{
-				Defaults = new RouteValueDictionary();
-				ParseToRouteValueDictionary(defaults, Defaults);
-			}
-
-			if (!string.IsNullOrEmpty(constraints))
-			{
-				Constraints = new RouteValueDictionary();
-				ParseToRouteValueDictionary(constraints, Constraints);
-			}
+			Defaults = defaults;
+			Constraints = constraints;
 		}
 
 		public string Name { get; set; }
@@ -63,11 +58,43 @@ namespace RouteMapDecorators
 
 		public int Order { get; set; }
 
-		public RouteValueDictionary Defaults { get; set; }
+		public virtual RouteValueDictionary GetDefaults()
+		{
+			if (string.IsNullOrEmpty(Defaults))
+			{
+				return null;
+			}
 
-		public RouteValueDictionary Constraints { get; set; }
+			var defaults = new RouteValueDictionary();
+			ParseStringToDefaultsRouteValueDictionary(Defaults, defaults);
 
-		private static void ParseToRouteValueDictionary(string valueString, RouteValueDictionary dictionary)
+			return defaults;
+		}
+
+		public virtual RouteValueDictionary GetConstraints()
+		{
+			if (string.IsNullOrEmpty(Constraints))
+			{
+				return null;
+			}
+
+			var constraints = new RouteValueDictionary();
+			ParseStringToConstraintsRouteValueDictionary(Constraints, constraints);
+
+			return constraints;
+		}
+
+		protected virtual void ParseStringToDefaultsRouteValueDictionary(string valueString, RouteValueDictionary dictionary)
+		{
+			ParseStringToRouteValueDictionary(valueString, dictionary);
+		}
+
+		protected virtual void ParseStringToConstraintsRouteValueDictionary(string valueString, RouteValueDictionary dictionary)
+		{
+			ParseStringToRouteValueDictionary(valueString, dictionary);
+		}
+
+		protected void ParseStringToRouteValueDictionary(string valueString, RouteValueDictionary dictionary)
 		{
 			var defaultsPairs = valueString.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 

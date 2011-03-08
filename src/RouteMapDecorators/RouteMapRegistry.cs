@@ -34,8 +34,8 @@ namespace RouteMapDecorators
 					var routeMapRoute = new RouteMapRoute(routeMapAttribute.Url, new MvcRouteHandler())
 					{
 						Order = routeMapAttribute.Order,
-						Defaults = routeMapAttribute.Defaults ?? new RouteValueDictionary(),
-						Constraints = routeMapAttribute.Constraints ?? new RouteValueDictionary()
+						Defaults = routeMapAttribute.GetDefaults() ?? new RouteValueDictionary(),
+						Constraints = routeMapAttribute.GetConstraints() ?? new RouteValueDictionary()
 					};
 
 					routeMapRoute.Defaults["controller"] = controllerName;
