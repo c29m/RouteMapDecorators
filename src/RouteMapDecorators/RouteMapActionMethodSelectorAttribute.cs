@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Reflection;
+using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace RouteMapDecorators
 {
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-	public class RouteMapAttribute : Attribute, IRouteMapAttribute
+	public abstract class RouteMapActionMethodSelectorAttribute : ActionMethodSelectorAttribute, IRouteMapAttribute
 	{
 		protected readonly string Constraints;
 		protected readonly string Defaults;
@@ -12,7 +14,7 @@ namespace RouteMapDecorators
 		/// <summary>
 		/// </summary>
 		/// <param name = "url">The url pattern that invokes the action when matched.</param>
-		public RouteMapAttribute(string url)
+		protected RouteMapActionMethodSelectorAttribute(string url)
 			: this(null, url, null, null)
 		{
 		}
@@ -22,7 +24,7 @@ namespace RouteMapDecorators
 		/// <param name = "url">The url pattern that invokes the action when matched.</param>
 		/// <param name = "defaults">A dictionary of key values formatted as: 'myParam=defValue;otherParam=someValue;</param>
 		/// <param name = "constraints">A dictionary of key values formatted as: 'myParam=regex;otherParam=regex;</param>
-		public RouteMapAttribute(string url, string defaults, string constraints)
+		protected RouteMapActionMethodSelectorAttribute(string url, string defaults, string constraints)
 			: this(null, url, defaults, constraints)
 		{
 		}
@@ -31,7 +33,7 @@ namespace RouteMapDecorators
 		/// </summary>
 		/// <param name = "name">The name of the route. Optional.</param>
 		/// <param name = "url">The url pattern that invokes the action when matched.</param>
-		public RouteMapAttribute(string name, string url)
+		protected RouteMapActionMethodSelectorAttribute(string name, string url)
 			: this(name, url, null, null)
 		{
 		}
@@ -42,7 +44,7 @@ namespace RouteMapDecorators
 		/// <param name = "url">The url pattern that invokes the action when matched.</param>
 		/// <param name = "defaults">A dictionary of key values formatted as: 'myParam=defValue;otherParam=someValue;'</param>
 		/// <param name = "constraints">A dictionary of key values formatted as: 'myParam=regex;otherParam=regex;'</param>
-		public RouteMapAttribute(string name, string url, string defaults, string constraints)
+		protected RouteMapActionMethodSelectorAttribute(string name, string url, string defaults, string constraints)
 		{
 			Name = name;
 			Url = url;
@@ -82,6 +84,28 @@ namespace RouteMapDecorators
 
 		#endregion
 
+
+		#region Overrides of ActionMethodSelectorAttribute
+
+		public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
+		{
+			var request = controllerContext.HttpContext.Request;
+
+			var httpMethod = (string)(
+				controllerContext.RouteData.Values["httpMethod"]
+					?? request.Headers["X-HTTP-Method-Override"]
+						?? request.Form["X-HTTP-Method-Override"]
+							?? request.QueryString["X-HTTP-Method-Override"]
+								?? request.HttpMethod
+				);
+
+			return httpMethod.Equals(GetActionHttpMethod(), StringComparison.OrdinalIgnoreCase);
+		}
+
+		#endregion
+
+
+		protected abstract string GetActionHttpMethod();
 
 		protected virtual RouteValueDictionary ParseStringToDefaultsRouteValueDictionary(string valueString)
 		{
