@@ -27,7 +27,7 @@ namespace RouteMapDecorators
 				var controllerName = GetControllerName(controllerType);
 				var actionName = GetActionName(action);
 
-				var routeMapAttributes = GetCustomAttributes<RouteMapAttribute>(action, false);
+				var routeMapAttributes = GetCustomAttributes<IRouteMapAttribute>(action, false);
 
 				foreach (var routeMapAttribute in routeMapAttributes)
 				{
@@ -90,6 +90,20 @@ namespace RouteMapDecorators
 		internal static IEnumerable<TType> GetCustomAttributes<TType>(MethodInfo methodInfo, bool inherit)
 		{
 			return methodInfo.GetCustomAttributes(typeof(TType), inherit).Cast<TType>();
+		}
+
+		internal static RouteValueDictionary ParseStringToRouteValueDictionary(string valueString)
+		{
+			var dictionary = new RouteValueDictionary();
+			var defaultsPairs = valueString.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+			foreach (var defaultsPair in defaultsPairs)
+			{
+				var keyValue = defaultsPair.Split(new[] { '=' });
+				dictionary[keyValue[0]] = keyValue[1];
+			}
+
+			return dictionary;
 		}
 	}
 }
